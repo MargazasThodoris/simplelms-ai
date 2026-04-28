@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Service\Analytics;
 
+use App\AI\AIClientInterface;
 use App\Entity\Department;
-use App\Repository\UserRepository;
 use App\Repository\JobDescriptionRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use OpenAI\Client as OpenAIClient;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -18,7 +18,7 @@ use Psr\Log\LoggerInterface;
 final class SkillGapMappingService
 {
     public function __construct(
-        private readonly OpenAIClient $openAI,
+        private readonly AIClientInterface $ai,
         private readonly EntityManagerInterface $em,
         private readonly UserRepository $userRepo,
         private readonly JobDescriptionRepository $jdRepo,
@@ -83,9 +83,8 @@ final class SkillGapMappingService
             $jds
         ));
 
-        $response = $this->openAI->chat()->create([
-            'model'    => $this->model,
-            'messages' => [
+        $content = $this->ai->chat(
+            [
                 ['role' => 'system', 'content' => 'You are an HR analytics AI. Extract required skills and proficiency levels from job descriptions. Respond ONLY with JSON.'],
                 ['role' => 'user', 'content' => <<<PROMPT
                     Extract required skills from these job descriptions for the {$department->getName()} department.
@@ -103,11 +102,11 @@ final class SkillGapMappingService
                     PROMPT
                 ],
             ],
-            'max_tokens'      => 1000,
-            'response_format' => ['type' => 'json_object'],
-        ]);
+            $this->model,
+            ['max_tokens' => 1000, 'response_format' => ['type' => 'json_object']]
+        );
 
-        $result = json_decode($response->choices[0]->message->content ?? '{}', true);
+        $result = json_decode($content, true);
         return $result['skills'] ?? [];
     }
 
@@ -177,17 +176,16 @@ final class SkillGapMappingService
 
         $gapSummary = json_encode(array_slice($criticalGaps, 0, 10));
 
-        $response = $this->openAI->chat()->create([
-            'model'    => $this->model,
-            'messages' => [
+        $content = $this->ai->chat(
+            [
                 ['role' => 'system', 'content' => 'You are an L&D strategy advisor. Respond ONLY with JSON.'],
                 ['role' => 'user', 'content' => "Generate training recommendations for these critical skill gaps:\n{$gapSummary}\n\nReturn: {\"recommendations\": [{\"skill\": \"...\", \"priority\": \"immediate|short_term|long_term\", \"approach\": \"...\", \"suggested_course_topics\": [...]}]}"],
             ],
-            'max_tokens'      => 800,
-            'response_format' => ['type' => 'json_object'],
-        ]);
+            $this->model,
+            ['max_tokens' => 800, 'response_format' => ['type' => 'json_object']]
+        );
 
-        $result = json_decode($response->choices[0]->message->content ?? '{}', true);
+        $result = json_decode($content, true);
         return $result['recommendations'] ?? [];
     }
 

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Service\AI;
 
+use App\AI\AIClientInterface;
 use App\Entity\Course;
-use App\Repository\CourseRepository;
 use App\Repository\ContentChunkRepository;
+use App\Repository\CourseRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use OpenAI\Client as OpenAIClient;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -18,16 +18,16 @@ use Psr\Log\LoggerInterface;
  */
 final class SmartSearchService
 {
-    private const EMBEDDING_MODEL = 'text-embedding-3-large';
-    private const TOP_K_CHUNKS    = 8;
+    private const TOP_K_CHUNKS = 8;
 
     public function __construct(
-        private readonly OpenAIClient $openAI,
+        private readonly AIClientInterface $ai,
         private readonly EntityManagerInterface $em,
         private readonly CourseRepository $courseRepo,
         private readonly ContentChunkRepository $chunkRepo,
         private readonly LoggerInterface $logger,
         private readonly string $model = 'gpt-4o',
+        private readonly string $embeddingModel = 'text-embedding-3-large',
     ) {}
 
     /**
@@ -97,19 +97,13 @@ final class SmartSearchService
      */
     public function embed(string $text): array
     {
-        $response = $this->openAI->embeddings()->create([
-            'model' => self::EMBEDDING_MODEL,
-            'input' => $text,
-        ]);
-
-        return $response->embeddings[0]->embedding ?? [];
+        return $this->ai->embed($text, $this->embeddingModel);
     }
 
     private function generateAnswer(string $query, string $context): string
     {
-        $response = $this->openAI->chat()->create([
-            'model'    => $this->model,
-            'messages' => [
+        return $this->ai->chat(
+            [
                 [
                     'role'    => 'system',
                     'content' => <<<PROMPT
@@ -125,11 +119,9 @@ final class SmartSearchService
                     'content' => "Context:\n{$context}\n\nQuestion: {$query}",
                 ],
             ],
-            'max_tokens'  => 600,
-            'temperature' => 0.2,
-        ]);
-
-        return $response->choices[0]->message->content ?? '';
+            $this->model,
+            ['max_tokens' => 600, 'temperature' => 0.2]
+        );
     }
 
     private function buildContext(array $chunks): string

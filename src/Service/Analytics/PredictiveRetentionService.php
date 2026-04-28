@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Service\Analytics;
 
+use App\AI\AIClientInterface;
 use App\Entity\User;
 use App\Message\SendRetentionNudgeMessage;
-use App\Repository\UserRepository;
 use App\Repository\EnrollmentRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use OpenAI\Client as OpenAIClient;
-use Symfony\Component\Messenger\MessageBusInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 /**
  * Predictive Retention Engine: analyses behavioural signals, computes
@@ -29,7 +29,7 @@ final class PredictiveRetentionService
         private readonly EntityManagerInterface $em,
         private readonly UserRepository $userRepo,
         private readonly EnrollmentRepository $enrollmentRepo,
-        private readonly OpenAIClient $openAI,
+        private readonly AIClientInterface $ai,
         private readonly MessageBusInterface $bus,
         private readonly LoggerInterface $logger,
         private readonly string $model = 'gpt-4o',
@@ -115,9 +115,8 @@ final class PredictiveRetentionService
      */
     public function computeAtRiskScore(User $user, array $signals): float
     {
-        $response = $this->openAI->chat()->create([
-            'model'    => $this->model,
-            'messages' => [
+        $content = $this->ai->chat(
+            [
                 [
                     'role'    => 'system',
                     'content' => 'You are a learning analytics engine. Analyze learner engagement signals and output ONLY a JSON risk assessment.',
@@ -151,12 +150,11 @@ final class PredictiveRetentionService
                         PROMPT,
                 ],
             ],
-            'max_tokens'      => 500,
-            'temperature'     => 0.1,
-            'response_format' => ['type' => 'json_object'],
-        ]);
+            $this->model,
+            ['max_tokens' => 500, 'temperature' => 0.1, 'response_format' => ['type' => 'json_object']]
+        );
 
-        $result = json_decode($response->choices[0]->message->content ?? '{}', true);
+        $result = json_decode($content, true);
         return (float) ($result['at_risk_score'] ?? 0.0);
     }
 

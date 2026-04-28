@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Service\AI;
 
+use App\AI\AIClientInterface;
 use App\Entity\Course;
 use App\Entity\Module;
 use App\Entity\User;
 use App\Service\Course\CourseBuilderService;
 use App\Service\Storage\S3Service;
 use Doctrine\ORM\EntityManagerInterface;
-use OpenAI\Client as OpenAIClient;
 use Psr\Log\LoggerInterface;
 use Smalot\PdfParser\Parser as PdfParser;
 
@@ -24,7 +24,7 @@ final class DocumentToCourseService
     private const CHUNK_SIZE = 4000; // characters per chunk sent to GPT
 
     public function __construct(
-        private readonly OpenAIClient $openAI,
+        private readonly AIClientInterface $ai,
         private readonly EntityManagerInterface $em,
         private readonly CourseBuilderService $courseBuilder,
         private readonly S3Service $s3,
@@ -105,9 +105,8 @@ final class DocumentToCourseService
     {
         $sample = mb_substr($text, 0, 8000); // first 8k chars for analysis
 
-        $response = $this->openAI->chat()->create([
-            'model'    => $this->model,
-            'messages' => [
+        $content = $this->ai->chat(
+            [
                 ['role' => 'system', 'content' => 'You are an expert instructional designer. Analyze this document and extract structured learning metadata. Respond ONLY with valid JSON.'],
                 ['role' => 'user', 'content' => <<<PROMPT
                     Document excerpt:
@@ -128,11 +127,11 @@ final class DocumentToCourseService
                     PROMPT
                 ],
             ],
-            'max_tokens'      => 800,
-            'response_format' => ['type' => 'json_object'],
-        ]);
+            $this->model,
+            ['max_tokens' => 800, 'response_format' => ['type' => 'json_object']]
+        );
 
-        return json_decode($response->choices[0]->message->content ?? '{}', true) ?? [];
+        return json_decode($content, true) ?? [];
     }
 
     /**
@@ -145,9 +144,8 @@ final class DocumentToCourseService
 
         foreach ($chunks as $index => $chunk) {
             $moduleNumber = $index + 1;
-            $response = $this->openAI->chat()->create([
-                'model'    => $this->model,
-                'messages' => [
+            $moduleContent = $this->ai->chat(
+                [
                     ['role' => 'system', 'content' => 'You are an expert instructional designer creating e-learning content. Respond ONLY with valid JSON.'],
                     ['role' => 'user', 'content' => <<<PROMPT
                         Create module #{$moduleNumber} for the course "{$analysis['title']}" based on this content section:
@@ -184,11 +182,11 @@ final class DocumentToCourseService
                         PROMPT
                     ],
                 ],
-                'max_tokens'      => 3000,
-                'response_format' => ['type' => 'json_object'],
-            ]);
+                $this->model,
+                ['max_tokens' => 3000, 'response_format' => ['type' => 'json_object']]
+            );
 
-            $moduleData = json_decode($response->choices[0]->message->content ?? '{}', true);
+            $moduleData = json_decode($moduleContent, true);
             if ($moduleData) {
                 $modules[] = $moduleData;
             }

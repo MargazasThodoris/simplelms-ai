@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service\AI;
 
-use OpenAI\Client as OpenAIClient;
+use App\AI\AIClientInterface;
 
 /**
  * Analyse the sentiment and emotional tone of a roleplay/tutoring transcript.
@@ -13,7 +13,7 @@ use OpenAI\Client as OpenAIClient;
 final class SentimentAnalysisService
 {
     public function __construct(
-        private readonly OpenAIClient $openAI,
+        private readonly AIClientInterface $ai,
         private readonly string $model = 'gpt-4o',
     ) {}
 
@@ -28,9 +28,8 @@ final class SentimentAnalysisService
      */
     public function analyzeTranscript(string $transcript): array
     {
-        $response = $this->openAI->chat()->create([
-            'model'    => $this->model,
-            'messages' => [
+        $content = $this->ai->chat(
+            [
                 [
                     'role'    => 'system',
                     'content' => 'You are a communication analysis AI. Analyze the sentiment and emotional dynamics of the following transcript. Respond ONLY with JSON.',
@@ -64,12 +63,11 @@ final class SentimentAnalysisService
                         PROMPT,
                 ],
             ],
-            'max_tokens'      => 1200,
-            'temperature'     => 0.1,
-            'response_format' => ['type' => 'json_object'],
-        ]);
+            $this->model,
+            ['max_tokens' => 1200, 'temperature' => 0.1, 'response_format' => ['type' => 'json_object']]
+        );
 
-        return json_decode($response->choices[0]->message->content ?? '{}', true) ?? [
+        return json_decode($content, true) ?? [
             'score'         => 0.5,
             'label'         => 'neutral',
             'breakdown'     => [],

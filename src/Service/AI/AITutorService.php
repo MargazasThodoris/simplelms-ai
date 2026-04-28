@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Service\AI;
 
+use App\AI\AIClientInterface;
 use App\Entity\AITutorSession;
 use App\Entity\Course;
 use App\Entity\User;
 use App\Repository\AITutorSessionRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use OpenAI\Client as OpenAIClient;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -27,7 +27,7 @@ final class AITutorService
         PROMPT;
 
     public function __construct(
-        private readonly OpenAIClient $openAI,
+        private readonly AIClientInterface $ai,
         private readonly EntityManagerInterface $em,
         private readonly AITutorSessionRepository $sessionRepo,
         private readonly SentimentAnalysisService $sentimentService,
@@ -74,22 +74,21 @@ final class AITutorService
         $session->addMessage('user', $userMessage);
 
         try {
-            $response = $this->openAI->chat()->create([
-                'model'       => $this->model,
-                'messages'    => $session->getMessages(),
-                'max_tokens'  => 800,
-                'temperature' => $session->getMode() === AITutorSession::MODE_ROLEPLAY ? 0.9 : 0.6,
-            ]);
-
-            $reply  = $response->choices[0]->message->content ?? '';
-            $tokens = $response->usage->totalTokens ?? 0;
+            $reply = $this->ai->chat(
+                $session->getMessages(),
+                $this->model,
+                [
+                    'max_tokens'  => 800,
+                    'temperature' => $session->getMode() === AITutorSession::MODE_ROLEPLAY ? 0.9 : 0.6,
+                ]
+            );
 
             $session->addMessage('assistant', $reply);
-            $session->addTokensUsed($tokens);
+            $session->addTokensUsed(0);
 
             $this->em->flush();
 
-            return ['reply' => $reply, 'tokens' => $tokens, 'session' => $session];
+            return ['reply' => $reply, 'tokens' => 0, 'session' => $session];
         } catch (\Throwable $e) {
             $this->logger->error('AITutor chat error', ['error' => $e->getMessage(), 'session' => (string) $session->getId()]);
             throw $e;
@@ -161,9 +160,8 @@ final class AITutorService
             ? "You are an expert communication coach. Analyze this role-play transcript and provide structured feedback."
             : "You are an expert learning coach. Analyze this tutoring session transcript and provide structured feedback.";
 
-        $response = $this->openAI->chat()->create([
-            'model'    => $this->model,
-            'messages' => [
+        $content = $this->ai->chat(
+            [
                 ['role' => 'system', 'content' => $prompt],
                 ['role' => 'user', 'content' => <<<PROMPT
                     Transcript:
@@ -180,11 +178,13 @@ final class AITutorService
                     PROMPT
                 ],
             ],
-            'max_tokens'      => 1000,
-            'response_format' => ['type' => 'json_object'],
-        ]);
+            $this->model,
+            [
+                'max_tokens'      => 1000,
+                'response_format' => ['type' => 'json_object'],
+            ]
+        );
 
-        $content = $response->choices[0]->message->content ?? '{}';
         return json_decode($content, true) ?? [];
     }
 

@@ -1,7 +1,10 @@
 # config/services.yaml
 parameters:
-    app.openai_model:      '%env(OPENAI_MODEL)%'
-    app.embedding_model:   '%env(OPENAI_EMBEDDING_MODEL)%'
+    app.ai_model:          '%env(AI_MODEL)%'
+    app.embedding_model:   '%env(EMBEDDING_MODEL)%'
+    app.ai_provider:       '%env(AI_PROVIDER)%'
+    app.ollama_base_url:   '%env(OLLAMA_BASE_URL)%'
+    app.aws_bedrock_region: '%env(AWS_BEDROCK_REGION)%'
     app.s3_bucket:         '%env(AWS_S3_BUCKET)%'
     app.aws_region:        '%env(AWS_REGION)%'
     app.feature.ai_tutor:  '%env(bool:FEATURE_AI_TUTOR)%'
@@ -14,7 +17,7 @@ services:
         autowire: true
         autoconfigure: true
         bind:
-            string $model: '%app.openai_model%'
+            string $model: '%app.ai_model%'
 
     App\:
         resource: '../src/'
@@ -24,12 +27,18 @@ services:
             - '../src/Kernel.php'
 
     # -------------------------------------------------------------------------
-    # OpenAI Client
+    # AI Client — controlled by AI_PROVIDER env var
+    # Supported: openai, ollama, claude, gemini, bedrock
     # -------------------------------------------------------------------------
-    OpenAI\Client:
-        factory: ['OpenAI', 'client']
+    App\AI\AIClientInterface:
+        factory: ['App\Factory\AIClientFactory', 'create']
         arguments:
-            $apiKey: '%env(OPENAI_API_KEY)%'
+            $provider:         '%app.ai_provider%'
+            $openaiApiKey:     '%env(OPENAI_API_KEY)%'
+            $ollamaBaseUrl:    '%app.ollama_base_url%'
+            $anthropicApiKey:  '%env(ANTHROPIC_API_KEY)%'
+            $geminiApiKey:     '%env(GEMINI_API_KEY)%'
+            $awsBedrockRegion: '%app.aws_bedrock_region%'
 
     # -------------------------------------------------------------------------
     # AWS SDK
@@ -64,23 +73,24 @@ services:
     # -------------------------------------------------------------------------
     App\Service\AI\AITutorService:
         arguments:
-            $model: '%app.openai_model%'
+            $model: '%app.ai_model%'
 
     App\Service\AI\SmartSearchService:
         arguments:
-            $model: '%app.openai_model%'
+            $model:          '%app.ai_model%'
+            $embeddingModel: '%app.embedding_model%'
 
     App\Service\AI\DocumentToCourseService:
         arguments:
-            $model: '%app.openai_model%'
+            $model: '%app.ai_model%'
 
     App\Service\Analytics\PredictiveRetentionService:
         arguments:
-            $model: '%app.openai_model%'
+            $model: '%app.ai_model%'
 
     App\Service\Analytics\SkillGapMappingService:
         arguments:
-            $model: '%app.openai_model%'
+            $model: '%app.ai_model%'
 
     # -------------------------------------------------------------------------
     # S3 Service

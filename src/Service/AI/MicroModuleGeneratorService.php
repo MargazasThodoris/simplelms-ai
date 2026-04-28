@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Service\AI;
 
-use App\Entity\User;
+use App\AI\AIClientInterface;
 use App\Entity\QuizAttempt;
+use App\Entity\User;
 use App\Repository\QuizAttemptRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use OpenAI\Client as OpenAIClient;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -24,7 +24,7 @@ final class MicroModuleGeneratorService
     private const WEAK_THRESHOLD = 0.6; // below 60% = weak area
 
     public function __construct(
-        private readonly OpenAIClient $openAI,
+        private readonly AIClientInterface $ai,
         private readonly EntityManagerInterface $em,
         private readonly QuizAttemptRepository $attemptRepo,
         private readonly LoggerInterface $logger,
@@ -92,9 +92,8 @@ final class MicroModuleGeneratorService
         $level        = $profile['skill_level'] ?? 'intermediate';
         $learningStyle = $profile['learning_style'] ?? 'visual';
 
-        $response = $this->openAI->chat()->create([
-            'model'    => $this->model,
-            'messages' => [
+        $moduleContent = $this->ai->chat(
+            [
                 [
                     'role'    => 'system',
                     'content' => 'You are an expert instructional designer creating ultra-concise micro-learning content. Respond ONLY with JSON.',
@@ -133,12 +132,11 @@ final class MicroModuleGeneratorService
                         PROMPT,
                 ],
             ],
-            'max_tokens'      => 900,
-            'temperature'     => 0.5,
-            'response_format' => ['type' => 'json_object'],
-        ]);
+            $this->model,
+            ['max_tokens' => 900, 'temperature' => 0.5, 'response_format' => ['type' => 'json_object']]
+        );
 
-        $module = json_decode($response->choices[0]->message->content ?? '{}', true) ?? [];
+        $module = json_decode($moduleContent, true) ?? [];
 
         $this->logger->info('Micro-module generated', [
             'userId'  => (string) $user->getId(),
