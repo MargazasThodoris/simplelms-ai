@@ -1,0 +1,91 @@
+# config/services.yaml
+parameters:
+    app.openai_model:      '%env(OPENAI_MODEL)%'
+    app.embedding_model:   '%env(OPENAI_EMBEDDING_MODEL)%'
+    app.s3_bucket:         '%env(AWS_S3_BUCKET)%'
+    app.aws_region:        '%env(AWS_REGION)%'
+    app.feature.ai_tutor:  '%env(bool:FEATURE_AI_TUTOR)%'
+    app.feature.smart_search: '%env(bool:FEATURE_SMART_SEARCH)%'
+    app.feature.predictive_retention: '%env(bool:FEATURE_PREDICTIVE_RETENTION)%'
+    app.feature.document_to_course: '%env(bool:FEATURE_DOCUMENT_TO_COURSE)%'
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        bind:
+            string $model: '%app.openai_model%'
+
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/Entity/'
+            - '../src/Kernel.php'
+
+    # -------------------------------------------------------------------------
+    # OpenAI Client
+    # -------------------------------------------------------------------------
+    OpenAI\Client:
+        factory: ['OpenAI', 'client']
+        arguments:
+            $apiKey: '%env(OPENAI_API_KEY)%'
+
+    # -------------------------------------------------------------------------
+    # AWS SDK
+    # -------------------------------------------------------------------------
+    Aws\S3\S3Client:
+        arguments:
+            - version: 'latest'
+              region:  '%app.aws_region%'
+
+    Aws\Sqs\SqsClient:
+        arguments:
+            - version: 'latest'
+              region:  '%app.aws_region%'
+
+    Aws\TranscribeService\TranscribeServiceClient:
+        arguments:
+            - version: 'latest'
+              region:  '%app.aws_region%'
+
+    Aws\Ses\SesClient:
+        arguments:
+            - version: 'latest'
+              region:  '%app.aws_region%'
+
+    # -------------------------------------------------------------------------
+    # PDF Parser
+    # -------------------------------------------------------------------------
+    Smalot\PdfParser\Parser: ~
+
+    # -------------------------------------------------------------------------
+    # AI Services — bind model overrides explicitly where needed
+    # -------------------------------------------------------------------------
+    App\Service\AI\AITutorService:
+        arguments:
+            $model: '%app.openai_model%'
+
+    App\Service\AI\SmartSearchService:
+        arguments:
+            $model: '%app.openai_model%'
+
+    App\Service\AI\DocumentToCourseService:
+        arguments:
+            $model: '%app.openai_model%'
+
+    App\Service\Analytics\PredictiveRetentionService:
+        arguments:
+            $model: '%app.openai_model%'
+
+    App\Service\Analytics\SkillGapMappingService:
+        arguments:
+            $model: '%app.openai_model%'
+
+    # -------------------------------------------------------------------------
+    # S3 Service
+    # -------------------------------------------------------------------------
+    App\Service\Storage\S3Service:
+        arguments:
+            $bucket: '%app.s3_bucket%'
+            $region: '%app.aws_region%'

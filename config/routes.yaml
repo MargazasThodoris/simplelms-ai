@@ -1,0 +1,67 @@
+# config/routes.yaml
+controllers:
+    resource:
+        path:      ../src/Controller/
+        namespace: App\Controller
+    type: attribute
+
+# ── Health ──────────────────────────────────────────────────────────────────
+api_health:
+    path:       /api/v1/health
+    controller: App\Controller\HealthController::index
+    methods:    GET
+
+# ── Auth ────────────────────────────────────────────────────────────────────
+api_auth_login:
+    path:    /api/v1/auth/login
+    methods: POST
+
+api_auth_refresh:
+    path:       /api/v1/auth/refresh
+    controller: App\Controller\AuthController::refresh
+    methods:    POST
+
+# ── Learner ─────────────────────────────────────────────────────────────────
+api_learner_dashboard:
+    path:       /api/v1/learner/dashboard
+    controller: App\Controller\LearnerController::dashboard
+    methods:    GET
+
+api_learner_courses:
+    path:       /api/v1/learner/courses
+    controller: App\Controller\LearnerController::myCourses
+    methods:    GET
+
+# ── Smart Search ─────────────────────────────────────────────────────────────
+api_search:
+    path:       /api/v1/search
+    controller: App\Controller\SmartSearchController::search
+    methods:    GET
+
+# ── Courses ──────────────────────────────────────────────────────────────────
+api_courses_list:
+    path:       /api/v1/courses
+    controller: App\Controller\CourseController::list
+    methods:    GET
+
+api_courses_show:
+    path:       /api/v1/courses/{id}
+    controller: App\Controller\CourseController::show
+    methods:    GET
+
+# ── AI Tutor (attribute routes on AITutorController) ─────────────────────────
+# Sessions: POST /api/v1/tutor/sessions
+# Chat:     POST /api/v1/tutor/sessions/{id}/chat
+# Complete: POST /api/v1/tutor/sessions/{id}/complete
+# Transcript: GET /api/v1/tutor/sessions/{id}/transcript
+
+# ── Admin ────────────────────────────────────────────────────────────────────
+api_admin_users:
+    path:       /api/v1/admin/users
+    controller: App\Controller\AdminUserController::list
+    methods:    GET
+
+api_admin_courses:
+    path:       /api/v1/admin/courses
+    controller: App\Controller\AdminCourseController::list
+    methods:    GET

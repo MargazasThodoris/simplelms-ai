@@ -1,0 +1,26 @@
+# config/packages/messenger.yaml
+framework:
+    messenger:
+        failure_transport: failed
+
+        transports:
+            async:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                options:
+                    queue_name: talentlms-async
+                    wait_time:  20
+                retry_strategy:
+                    max_retries: 3
+                    delay:       1000
+                    multiplier:  2
+                    max_delay:   30000
+
+            failed:
+                dsn: '%env(MESSENGER_TRANSPORT_FAILED_DSN)%'
+
+        routing:
+            App\Message\ConvertDocumentToCourseMessage: async
+            App\Message\SendRetentionNudgeMessage:      async
+            App\Message\GenerateMicroModuleMessage:     async
+            App\Message\IndexContentMessage:            async
+            App\Message\GenerateVoiceoverMessage:       async

@@ -1,0 +1,96 @@
+{
+    "name": "talentlms/ai-platform",
+    "description": "TalentLMS AI-Powered Learning Management System",
+    "type": "project",
+    "license": "proprietary",
+    "require": {
+        "php": ">=8.3",
+        "ext-ctype": "*",
+        "ext-iconv": "*",
+        "ext-json": "*",
+        "ext-pdo": "*",
+        "ext-redis": "*",
+        "symfony/asset": "7.2.*",
+        "symfony/console": "7.2.*",
+        "symfony/doctrine-messenger": "7.2.*",
+        "symfony/dotenv": "7.2.*",
+        "symfony/flex": "^2",
+        "symfony/form": "7.2.*",
+        "symfony/framework-bundle": "7.2.*",
+        "symfony/http-client": "7.2.*",
+        "symfony/mailer": "7.2.*",
+        "symfony/messenger": "7.2.*",
+        "symfony/monolog-bundle": "^3.0",
+        "symfony/runtime": "7.2.*",
+        "symfony/security-bundle": "7.2.*",
+        "symfony/serializer": "7.2.*",
+        "symfony/twig-bundle": "7.2.*",
+        "symfony/uid": "7.2.*",
+        "symfony/validator": "7.2.*",
+        "symfony/yaml": "7.2.*",
+        "doctrine/doctrine-bundle": "^2.12",
+        "doctrine/doctrine-migrations-bundle": "^3.3",
+        "doctrine/orm": "^3.2",
+        "lexik/jwt-authentication-bundle": "^3.1",
+        "nelmio/api-doc-bundle": "^4.26",
+        "nelmio/cors-bundle": "^2.5",
+        "openai-php/client": "^0.10",
+        "aws/aws-sdk-php": "^3.319",
+        "knplabs/knp-paginator-bundle": "^6.4",
+        "stof/doctrine-extensions-bundle": "^1.12",
+        "gedmo/doctrine-extensions": "^3.16",
+        "symfony/amazon-sqs-messenger": "7.2.*",
+        "symfony/cache": "7.2.*",
+        "symfony/rate-limiter": "7.2.*",
+        "symfony/lock": "7.2.*",
+        "vich/uploader-bundle": "^2.4",
+        "oneup/flysystem-bundle": "^4.5",
+        "league/flysystem-aws-s3-v3": "^3.28",
+        "php-ffmpeg/php-ffmpeg": "^1.2",
+        "smalot/pdfparser": "^2.10",
+        "phpoffice/phpword": "^1.3"
+    },
+    "require-dev": {
+        "symfony/browser-kit": "7.2.*",
+        "symfony/css-selector": "7.2.*",
+        "symfony/debug-bundle": "7.2.*",
+        "symfony/maker-bundle": "^1.0",
+        "symfony/phpunit-bridge": "7.2.*",
+        "symfony/stopwatch": "7.2.*",
+        "symfony/web-profiler-bundle": "7.2.*",
+        "doctrine/doctrine-fixtures-bundle": "^3.6",
+        "phpunit/phpunit": "^11.0",
+        "fakerphp/faker": "^1.23",
+        "phpstan/phpstan": "^1.12",
+        "friendsofphp/php-cs-fixer": "^3.64"
+    },
+    "config": {
+        "allow-plugins": {
+            "php-http/discovery": true,
+            "symfony/flex": true,
+            "symfony/runtime": true
+        },
+        "sort-packages": true
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "App\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "auto-scripts": {
+            "cache:clear": "symfony-cmd",
+            "assets:install %PUBLIC_DIR%": "symfony-cmd"
+        },
+        "post-install-cmd": ["@auto-scripts"],
+        "post-update-cmd": ["@auto-scripts"],
+        "test": "php bin/phpunit",
+        "lint": "php-cs-fixer fix --dry-run --diff",
+        "stan": "phpstan analyse src tests --level 8"
+    }
+}
