@@ -65,3 +65,22 @@ api_admin_courses:
     path:       /api/v1/admin/courses
     controller: App\Controller\AdminCourseController::list
     methods:    GET
+
+# ── API docs (Nelmio Swagger UI) ──────────────────────────────────────────
+app.swagger_ui:
+    path:       /api/doc
+    controller: nelmio_api_doc.controller.swagger_ui
+
+app.swagger:
+    path:       /api/doc.json
+    controller: nelmio_api_doc.controller.swagger
+
+# ── Dev toolbar / profiler ──────────────────────────────────────────────────
+when@dev:
+    web_profiler_wdt:
+        resource: '@WebProfilerBundle/Resources/config/routing/wdt.xml'
+        prefix:   /_wdt
+
+    web_profiler_profiler:
+        resource: '@WebProfilerBundle/Resources/config/routing/profiler.xml'
+        prefix:   /_profiler
