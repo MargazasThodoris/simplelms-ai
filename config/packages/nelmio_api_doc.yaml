@@ -1,0 +1,9 @@
+nelmio_api_doc:
+    documentation:
+        info:
+            title: SimpleLMS AI Platform API
+            description: AI-powered LMS API
+            version: 1.0.0
+    areas:
+        path_patterns:
+            - ^/api(?!/doc$)
