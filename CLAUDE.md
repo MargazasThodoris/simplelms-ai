@@ -102,7 +102,7 @@ All AI services depend on `App\AI\AIClientInterface` (two methods: `chat()` and 
 ### Feature Overview
 
 #### AI Tutor / AI Coach (`AITutorService`)
-Conversational coaching and role-play simulations for learners. Equivalent to TalentLMS's native AI Coach feature but provider-agnostic.
+Conversational coaching and role-play simulations for learners. Equivalent to simplelms's native AI Coach feature but provider-agnostic.
 
 - `MODE_CHAT` — Socratic coaching, adapts to learner level
 - `MODE_ROLEPLAY` — Persona-driven simulations (e.g. difficult customer, job interview); tension escalates/de-escalates based on learner responses

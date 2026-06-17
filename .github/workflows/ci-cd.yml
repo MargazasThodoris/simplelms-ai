@@ -1,5 +1,5 @@
 ##############################################################################
-# TalentLMS AI — GitHub Actions CI/CD Pipeline
+# simplelms AI — GitHub Actions CI/CD Pipeline
 # On push to main: Test → Build → Push ECR → Deploy to ECS
 ##############################################################################
 name: CI/CD Pipeline
@@ -13,8 +13,8 @@ on:
 env:
   AWS_REGION:       eu-west-1
   ECR_REGISTRY:     ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-west-1.amazonaws.com
-  APP_IMAGE_NAME:   talentlms/app
-  WORKER_IMAGE_NAME: talentlms/worker
+  APP_IMAGE_NAME:   simplelms/app
+  WORKER_IMAGE_NAME: simplelms/worker
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
@@ -28,8 +28,8 @@ jobs:
       postgres:
         image: postgres:16-alpine
         env:
-          POSTGRES_DB:       talentlms_test
-          POSTGRES_USER:     talentlms
+          POSTGRES_DB:       simplelms_test
+          POSTGRES_USER:     simplelms
           POSTGRES_PASSWORD: test
         options: >-
           --health-cmd pg_isready
@@ -74,7 +74,7 @@ jobs:
 
       - name: Setup test environment
         env:
-          DATABASE_URL: postgresql://talentlms:test@localhost:5432/talentlms_test
+          DATABASE_URL: postgresql://simplelms:test@localhost:5432/simplelms_test
           REDIS_URL: redis://localhost:6379
           APP_ENV: test
           APP_SECRET: test_secret_32_characters_long_xx
@@ -85,7 +85,7 @@ jobs:
 
       - name: Run test suite
         env:
-          DATABASE_URL: postgresql://talentlms:test@localhost:5432/talentlms_test
+          DATABASE_URL: postgresql://simplelms:test@localhost:5432/simplelms_test
           REDIS_URL: redis://localhost:6379
           APP_ENV: test
           APP_SECRET: test_secret_32_characters_long_xx
@@ -181,8 +181,8 @@ jobs:
       - name: Run DB migrations (one-off ECS task)
         run: |
           aws ecs run-task \
-            --cluster talentlms-cluster \
-            --task-definition talentlms-worker \
+            --cluster simplelms-cluster \
+            --task-definition simplelms-worker \
             --launch-type FARGATE \
             --network-configuration "awsvpcConfiguration={subnets=[${{ secrets.PRIVATE_SUBNET_IDS }}],securityGroups=[${{ secrets.APP_SG_ID }}],assignPublicIp=DISABLED}" \
             --overrides '{"containerOverrides":[{"name":"worker","command":["php","bin/console","doctrine:migrations:migrate","--no-interaction"]}]}' \
@@ -191,24 +191,24 @@ jobs:
       - name: Update App ECS service
         run: |
           aws ecs update-service \
-            --cluster talentlms-cluster \
-            --service talentlms-app \
+            --cluster simplelms-cluster \
+            --service simplelms-app \
             --force-new-deployment \
-            --task-definition talentlms-app
+            --task-definition simplelms-app
 
       - name: Update Worker ECS service
         run: |
           aws ecs update-service \
-            --cluster talentlms-cluster \
-            --service talentlms-worker \
+            --cluster simplelms-cluster \
+            --service simplelms-worker \
             --force-new-deployment \
-            --task-definition talentlms-worker
+            --task-definition simplelms-worker
 
       - name: Wait for App service stability
         run: |
           aws ecs wait services-stable \
-            --cluster talentlms-cluster \
-            --services talentlms-app
+            --cluster simplelms-cluster \
+            --services simplelms-app
 
       - name: Deployment summary
         run: |

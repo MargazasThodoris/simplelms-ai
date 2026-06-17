@@ -1,4 +1,4 @@
-# TalentLMS AI Platform
+# simplelms AI Platform
 ### Agentic AI-Powered Learning Management System — Symfony 7.2 / PHP 8.3 on AWS
 
 > *"The best LMS is the one that manages itself."*
@@ -130,7 +130,7 @@ Monitors 9 behavioural signals (login frequency, quiz scores, video watch rate, 
 ## Project Structure
 
 ```
-talentlms-ai/
+simplelms-ai/
 ├── src/
 │   ├── Controller/
 │   │   ├── AITutorController.php       # SSE streaming chat
@@ -182,7 +182,7 @@ talentlms-ai/
 
 ```bash
 # 1. Clone and install
-git clone https://github.com/your-org/talentlms-ai
+git clone https://github.com/your-org/simplelms-ai
 cd simplelms-ai
 composer install
 
@@ -219,8 +219,8 @@ terraform init
 
 # Plan
 terraform plan \
-  -var="app_image=123456789.dkr.ecr.eu-west-1.amazonaws.com/talentlms/app:latest" \
-  -var="worker_image=123456789.dkr.ecr.eu-west-1.amazonaws.com/talentlms/worker:latest" \
+  -var="app_image=123456789.dkr.ecr.eu-west-1.amazonaws.com/simplelms/app:latest" \
+  -var="worker_image=123456789.dkr.ecr.eu-west-1.amazonaws.com/simplelms/worker:latest" \
   -var="db_password=$DB_PASSWORD" \
   -var="jwt_passphrase=$JWT_PASSPHRASE" \
   -var="openai_api_key=$OPENAI_API_KEY" \

@@ -7,7 +7,7 @@ framework:
             async:
                 dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
                 options:
-                    queue_name: talentlms-async
+                    queue_name: simplelms-async
                     wait_time:  20
                 retry_strategy:
                     max_retries: 3

@@ -1,5 +1,5 @@
 ###############################################################################
-# TalentLMS AI Platform — AWS Infrastructure (Terraform)
+# simplelms AI Platform — AWS Infrastructure (Terraform)
 # Architecture: ECS Fargate (app + workers) · RDS Aurora PostgreSQL ·
 #               ElastiCache Redis · SQS · S3 · ALB · CloudFront · SES · ACM
 ###############################################################################
@@ -13,11 +13,11 @@ terraform {
     }
   }
   backend "s3" {
-    bucket         = "talentlms-terraform-state"
+    bucket         = "simpelms-terraform-state"
     key            = "production/terraform.tfstate"
     region         = "eu-west-1"
     encrypt        = true
-    dynamodb_table = "talentlms-terraform-locks"
+    dynamodb_table = "simpelms-terraform-locks"
   }
 }
 
@@ -25,7 +25,7 @@ provider "aws" {
   region = var.aws_region
   default_tags {
     tags = {
-      Project     = "TalentLMS-AI"
+      Project     = "simpeLMS-AI"
       Environment = var.environment
       ManagedBy   = "Terraform"
     }
@@ -37,13 +37,13 @@ provider "aws" {
 ###############################################################################
 variable "aws_region"        { default = "eu-west-1" }
 variable "environment"       { default = "production" }
-variable "app_name"          { default = "talentlms" }
+variable "app_name"          { default = "simpelms" }
 variable "app_image"         { description = "ECR image URI for the PHP app" }
 variable "worker_image"      { description = "ECR image URI for the Messenger worker" }
 variable "db_password"       { sensitive = true }
 variable "jwt_passphrase"    { sensitive = true }
 variable "openai_api_key"    { sensitive = true }
-variable "domain_name"       { default = "talentlms.example.com" }
+variable "domain_name"       { default = "simpelms.example.com" }
 variable "certificate_arn"   { description = "ACM certificate ARN for HTTPS" }
 
 ###############################################################################
@@ -145,8 +145,8 @@ resource "aws_rds_cluster" "main" {
   cluster_identifier      = "${var.app_name}-aurora"
   engine                  = "aurora-postgresql"
   engine_version          = "16.2"
-  database_name           = "talentlms"
-  master_username         = "talentlms"
+  database_name           = "simpelms"
+  master_username         = "simpelms"
   master_password         = var.db_password
   db_subnet_group_name    = module.vpc.database_subnet_group_name
   vpc_security_group_ids  = [aws_security_group.rds.id]
@@ -172,7 +172,7 @@ resource "aws_rds_cluster_instance" "instances" {
 ###############################################################################
 resource "aws_elasticache_replication_group" "redis" {
   replication_group_id = "${var.app_name}-redis"
-  description          = "TalentLMS Redis — sessions, cache, rate limiting"
+  description          = "simpeLMS Redis — sessions, cache, rate limiting"
   node_type            = "cache.r7g.large"
   num_cache_clusters   = 2
   port                 = 6379
@@ -417,7 +417,7 @@ resource "aws_cloudfront_distribution" "media" {
 
   enabled         = true
   is_ipv6_enabled = true
-  comment         = "TalentLMS media CDN"
+  comment         = "simpeLMS media CDN"
 
   default_cache_behavior {
     allowed_methods        = ["GET", "HEAD"]

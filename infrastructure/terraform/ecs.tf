@@ -57,7 +57,7 @@ resource "aws_ecs_task_definition" "app" {
       essential = true
       portMappings = [{ containerPort = 9000, hostPort = 9000 }]
       environment = concat(local.common_environment, [
-        { name = "DATABASE_URL", value = "postgresql://talentlms:$(DB_PASSWORD)@${aws_rds_cluster.main.endpoint}:5432/talentlms" },
+        { name = "DATABASE_URL", value = "postgresql://simplelms:$(DB_PASSWORD)@${aws_rds_cluster.main.endpoint}:5432/simplelms" },
         { name = "REDIS_URL",    value = "redis://${aws_elasticache_replication_group.redis.primary_endpoint_address}:6379" },
       ])
       secrets = local.common_secrets
@@ -108,7 +108,7 @@ resource "aws_ecs_task_definition" "worker" {
       essential = true
       command   = ["php", "bin/console", "messenger:consume", "async", "--time-limit=3600", "--memory-limit=512M", "-vv"]
       environment = concat(local.common_environment, [
-        { name = "DATABASE_URL", value = "postgresql://talentlms:$(DB_PASSWORD)@${aws_rds_cluster.main.endpoint}:5432/talentlms" },
+        { name = "DATABASE_URL", value = "postgresql://simplelms:$(DB_PASSWORD)@${aws_rds_cluster.main.endpoint}:5432/simplelms" },
         { name = "REDIS_URL",    value = "redis://${aws_elasticache_replication_group.redis.primary_endpoint_address}:6379" },
       ])
       secrets = local.common_secrets

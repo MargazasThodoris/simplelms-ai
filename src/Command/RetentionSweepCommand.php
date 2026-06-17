@@ -41,7 +41,7 @@ final class RetentionSweepCommand extends Command
         $orgId  = $input->getOption('org-id');
         $start  = microtime(true);
 
-        $io->title('TalentLMS — Predictive Retention Sweep');
+        $io->title('simplelms — Predictive Retention Sweep');
 
         if ($orgId) {
             $orgIds = [(int) $orgId];
