@@ -1,6 +1,6 @@
 {
     "name": "simplelms/ai-platform",
-    "description": "simplelms AI-Powered Learning Management System",
+    "description": "SimpleLMS AI-Powered Learning Management System",
     "type": "project",
     "license": "proprietary",
     "require": {

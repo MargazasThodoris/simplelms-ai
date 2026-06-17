@@ -1,4 +1,4 @@
-# simplelms AI Platform
+# SimpleLMS AI Platform
 ### Agentic AI-Powered Learning Management System — Symfony 7.2 / PHP 8.3 on AWS
 
 > *"The best LMS is the one that manages itself."*

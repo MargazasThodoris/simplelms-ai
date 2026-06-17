@@ -1,5 +1,5 @@
 ###############################################################################
-# simplelms AI Platform — AWS Infrastructure (Terraform)
+# SimpleLMS AI Platform — AWS Infrastructure (Terraform)
 # Architecture: ECS Fargate (app + workers) · RDS Aurora PostgreSQL ·
 #               ElastiCache Redis · SQS · S3 · ALB · CloudFront · SES · ACM
 ###############################################################################
@@ -25,7 +25,7 @@ provider "aws" {
   region = var.aws_region
   default_tags {
     tags = {
-      Project     = "simpeLMS-AI"
+      Project     = "SimpeLMS-AI"
       Environment = var.environment
       ManagedBy   = "Terraform"
     }

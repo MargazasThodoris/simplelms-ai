@@ -1,5 +1,5 @@
 ##############################################################################
-# simplelms AI — GitHub Actions CI/CD Pipeline
+# SimpleLMS AI — GitHub Actions CI/CD Pipeline
 # On push to main: Test → Build → Push ECR → Deploy to ECS
 ##############################################################################
 name: CI/CD Pipeline
