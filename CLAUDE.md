@@ -65,7 +65,7 @@ Heavy AI operations are dispatched as Messenger messages and processed by the wo
 
 | Message | Purpose |
 |---|---|
-| `ConvertDocumentToCourseMessage` | TalentCraft 2.0 pipeline (PDF/DOCX → course) |
+| `ConvertDocumentToCourseMessage` | DocScan 2.0 pipeline (PDF/DOCX → course) |
 | `SendRetentionNudgeMessage` | Personalised at-risk learner emails via SES |
 | `GenerateMicroModuleMessage` | Auto-generated micro-modules from quiz gaps |
 | `IndexContentMessage` | Embed and persist content chunks for RAG |
@@ -112,7 +112,7 @@ Conversational coaching and role-play simulations for learners. Equivalent to si
 #### Smart Search (`SmartSearchService`)
 RAG-powered semantic search across all LMS content (PDFs, video transcripts, SCORM, policies). Returns a grounded answer with timestamped source links. Content is indexed via `indexContent()` which chunks text into 512-word windows with 64-word overlap.
 
-#### TalentCraft 2.0 — Document to Course (`DocumentToCourseService`)
+#### DocScan 2.0 — Document to Course (`DocumentToCourseService`)
 Converts PDF, DOCX, or TXT files into fully structured courses. Pipeline: S3 download → text extraction → GPT analysis of learning objectives → per-chunk module/lesson/quiz generation → `CourseBuilderService`. Each module includes HTML content, a TTS-ready voiceover script, key concepts, and a quiz with explanations.
 
 #### Micro-Module Generator (`MicroModuleGeneratorService`)

@@ -15,7 +15,7 @@ use Psr\Log\LoggerInterface;
 use Smalot\PdfParser\Parser as PdfParser;
 
 /**
- * TalentCraft 2.0: Converts raw documents (PDF, DOCX, TXT) into
+ * DocScan 2.0: Converts raw documents (PDF, DOCX, TXT) into
  * fully structured interactive courses with AI-generated objectives,
  * modules, quiz questions, and voiceover scripts.
  */

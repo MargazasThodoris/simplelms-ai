@@ -97,7 +97,7 @@ GET /api/v1/search?q=What+is+our+remote+work+policy+in+France
 3. Top-8 chunks → GPT-4o grounded answer generation
 4. Source citations with deep links
 
-### 4. 📄 TalentCraft 2.0 — Document to Course
+### 4. 📄 DocScan 2.0 — Document to Course
 **Endpoint:** `POST /api/v1/courses/generate-from-document`
 
 Upload a 50-page PDF/DOCX and get back a full interactive course in minutes, processed asynchronously via SQS + ECS worker:
@@ -146,7 +146,7 @@ simplelms-ai/
 │   ├── Service/
 │   │   ├── AI/
 │   │   │   ├── AITutorService.php          # Core chat/roleplay engine
-│   │   │   ├── DocumentToCourseService.php # TalentCraft 2.0
+│   │   │   ├── DocumentToCourseService.php # DocScan 2.0
 │   │   │   ├── SmartSearchService.php      # RAG pipeline
 │   │   │   ├── MicroModuleGeneratorService.php
 │   │   │   └── SentimentAnalysisService.php
