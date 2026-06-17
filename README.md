@@ -183,7 +183,7 @@ talentlms-ai/
 ```bash
 # 1. Clone and install
 git clone https://github.com/your-org/talentlms-ai
-cd talentlms-ai
+cd simplelms-ai
 composer install
 
 # 2. Environment
